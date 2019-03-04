@@ -103,7 +103,7 @@ public class OSLogDestination: Destination {
 	public var system: String
 	public var category: String
 	public var levels: Level
-	public var formatter: Formatter?
+	public let formatter: Formatter? = nil // Use OSLog string formatting instead
 
 	init(system: String, category: String, levels: Level) {
 		self.system = system
@@ -115,7 +115,11 @@ public class OSLogDestination: Destination {
 
 	public func log(entry: Entry) {
 		guard shouldLog(entry: entry) else { return  }
-		os_log(osLogType(forLevel: entry.level), log: log, entry.format, entry.args)
+		if #available(iOS 12.0, *) {
+			os_log(osLogType(forLevel: entry.level), log: log, entry.format, entry.args)
+		} else {
+			os_log(entry.format, log: log, type: osLogType(forLevel: entry.level), entry.args)
+		}
 	}
 
 	private func osLogType(forLevel level: Level.RawValue) -> OSLogType {
