@@ -78,13 +78,19 @@ public protocol Formatter {
 public struct DefaultFormatter: Formatter {
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
 		let message = String(format: String(entry.format), entry.args)
-		return String(format: "[%@] %@", destination.category, message)
+		if let system = destination.system, let category = destination.category {
+			return String(format: "%@ [%@] %@", system, category, message)
+		} else if let category = destination.category {
+			return String(format: "[%@] %@", category, message)
+		} else {
+			return String(format: "%@", message)
+		}
 	}
 }
 
 public protocol Destination {
-	var system: String { get }
-	var category: String { get }
+	var system: String? { get }
+	var category: String? { get }
 	var levels: Level { get }
 	var formatter: Formatter? { get }
 
@@ -100,17 +106,22 @@ extension Destination {
 }
 
 public class OSLogDestination: Destination {
-	public var system: String
-	public var category: String
+	public var system: String?
+	public var category: String?
 	public var levels: Level
 	public let formatter: Formatter? = nil // Use OSLog string formatting instead
 
-	init(system: String, category: String, levels: Level) {
+	init(system: String?, category: String?, levels: Level) {
 		self.system = system
 		self.category = category
 		self.levels = levels
 
-		log = OSLog(subsystem: system, category: category)
+		if let system = system, let category = category {
+			log = OSLog(subsystem: system, category: category)
+		} else {
+			log = OSLog.default
+		}
+
 	}
 
 	public func log(entry: Entry) {
@@ -142,13 +153,13 @@ public class OSLogDestination: Destination {
 }
 
 public class OutputStreamDestination<Target: TextOutputStream>: Destination {
-	public var system: String
-	public var category: String
+	public var system: String?
+	public var category: String?
 	public var levels: Level
 	public var formatter: Formatter? = DefaultFormatter()
 
-	init(system: String, category: String, levels: Level, outputStream: inout Target) {
-		self.system = system
+	init(system: String?, category: String?, levels: Level, outputStream: inout Target) {
+		self.system = system ?? String(format: "%@[%@]", ProcessInfo.processInfo.processName, ProcessInfo.processInfo.processIdentifier)
 		self.category = category
 		self.levels = levels
 		self.outputStream = outputStream
