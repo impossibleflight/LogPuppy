@@ -15,10 +15,14 @@ public class Logger {
 		self.destinations = destinations
 	}
 
-	public func log(_ levels: Level = .default, format: StaticString, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, args: CVarArg...) {
+	public func log(_ levels: Level = .default, _ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, _ args: CVarArg...) {
+		log(levels, format, file: file, function: function, line: line, column: column, arguments: args)
+	}
+
+	public func log(_ levels: Level = .default, _ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, arguments: [CVarArg]) {
 		let callsite = Callsite(file: file, function: function, line: line, column: column)
 		for level in levels {
-			let entry = Entry(level: level.rawValue, format: format, args: args, callsite: callsite)
+			let entry = Entry(level: level.rawValue, format: format, args: arguments, callsite: callsite)
 			log(entry: entry)
 		}
 	}
@@ -27,6 +31,24 @@ public class Logger {
 		for destination in destinations {
 			destination.log(entry: entry)
 		}
+	}
+}
+
+extension Logger {
+	public func `default`(_ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, args: CVarArg...) {
+		log(.default, format, file: file, function: function, line: line, column: column, arguments: args)
+	}
+	public func info(_ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, _ args: CVarArg...) {
+		log(.info, format, file: file, function: function, line: line, column: column, arguments: args)
+	}
+	public func debug(_ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, _ args: CVarArg...) {
+		log(.debug, format, file: file, function: function, line: line, column: column, arguments: args)
+	}
+	public func error(_ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, _ args: CVarArg...) {
+		log(.error, format, file: file, function: function, line: line, column: column, arguments: args)
+	}
+	public func fault(_ format: String, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column, _ args: CVarArg...) {
+		log(.fault, format, file: file, function: function, line: line, column: column, arguments: args)
 	}
 }
 
@@ -59,14 +81,14 @@ public struct Callsite {
 
 public struct Entry {
 	var level: Level.RawValue
-	var format: StaticString
-	var args: [CVarArg]
+	var format: String
+	var arguments: [CVarArg]
 	var callsite: Callsite
 
-	init(level: Level.RawValue, format: StaticString, args: [CVarArg] = [], callsite: Callsite) {
+	init(level: Level.RawValue, format: String, args: [CVarArg] = [], callsite: Callsite) {
 		self.level = level
 		self.format = format
-		self.args = args
+		self.arguments = args
 		self.callsite = callsite
 	}
 }
@@ -77,16 +99,31 @@ public protocol Formatter {
 
 public struct DefaultFormatter: Formatter {
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
-		let message = String(format: String(entry.format), entry.args)
-		return String(format: "[%@] %@", destination.category, message)
+		let message = String(format: entry.format, arguments: entry.arguments)
+		if let system = destination.system, let category = destination.category {
+			return String(format: "%@ [%@] %@", system, category, message)
+		} else if let category = destination.category {
+			return String(format: "[%@] %@", category, message)
+		} else {
+			return String(format: "%@", message)
+		}
+	}
+}
+
+public struct SimpleFormatter: Formatter {
+	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
+		let format = entry.format
+		let args: [CVarArg] = entry.arguments
+		let message = String(format: format, arguments: args)
+		return message
 	}
 }
 
 public protocol Destination {
-	var system: String { get }
-	var category: String { get }
+	var system: String? { get }
+	var category: String? { get }
 	var levels: Level { get }
-	var formatter: Formatter? { get }
+	var formatter: Formatter { get }
 
 	func log(entry: Entry)
 }
@@ -100,22 +137,31 @@ extension Destination {
 }
 
 public class OSLogDestination: Destination {
-	public var system: String
-	public var category: String
+	public var system: String?
+	public var category: String?
 	public var levels: Level
-	public var formatter: Formatter?
+	public let formatter: Formatter = SimpleFormatter()
 
-	init(system: String, category: String, levels: Level) {
+	public init(system: String?, category: String?, levels: Level) {
 		self.system = system
 		self.category = category
 		self.levels = levels
 
-		log = OSLog(subsystem: system, category: category)
+		if let system = system, let category = category {
+			log = OSLog(subsystem: system, category: category)
+		} else {
+			log = OSLog.default
+		}
 	}
 
 	public func log(entry: Entry) {
 		guard shouldLog(entry: entry) else { return  }
-		os_log(osLogType(forLevel: entry.level), log: log, entry.format, entry.args)
+		let message = formatter.format(entry, forDestination: self)
+		if #available(iOS 12.0, *) {
+			os_log(osLogType(forLevel: entry.level), log: log, "%{public}s", message)
+		} else {
+			os_log("%{public}s", log: log, type: osLogType(forLevel: entry.level), message)
+		}
 	}
 
 	private func osLogType(forLevel level: Level.RawValue) -> OSLogType {
@@ -138,13 +184,13 @@ public class OSLogDestination: Destination {
 }
 
 public class OutputStreamDestination<Target: TextOutputStream>: Destination {
-	public var system: String
-	public var category: String
+	public var system: String?
+	public var category: String?
 	public var levels: Level
-	public var formatter: Formatter? = DefaultFormatter()
+	public var formatter: Formatter = DefaultFormatter()
 
-	init(system: String, category: String, levels: Level, outputStream: inout Target) {
-		self.system = system
+	public init(system: String?, category: String?, levels: Level, outputStream: inout Target) {
+		self.system = system ?? String(format: "%@[%@]", ProcessInfo.processInfo.processName, ProcessInfo.processInfo.processIdentifier)
 		self.category = category
 		self.levels = levels
 		self.outputStream = outputStream
@@ -152,10 +198,10 @@ public class OutputStreamDestination<Target: TextOutputStream>: Destination {
 
 	public func log(entry: Entry) {
 		guard shouldLog(entry: entry) else { return  }
-		guard let formatter = formatter else { return }
 		let message = formatter.format(entry, forDestination: self)
 		message.write(to: &outputStream)
 	}
 
 	private var outputStream: Target
 }
+

@@ -27,7 +27,7 @@ class LogPuppyTests: XCTestCase {
 		let destination = OutputStreamDestination(system: system, category: category, levels: .all, outputStream: &output)
 		let logger = Logger(destinations: [destination])
 
-		logger.log(.default, format: "something at .default")
+		logger.log(.default, "something at .default")
 
 		let defaultRange: NSRange = (output as NSString).range(of: ".default")
 		XCTAssertTrue(defaultRange.location != NSNotFound)
@@ -36,8 +36,46 @@ class LogPuppyTests: XCTestCase {
 	func testOSLog() {
 		let destination = OSLogDestination(system: system, category: category, levels: .all)
 		let logger = Logger(destinations: [destination])
-		logger.log(.default, format: "something at .default")
-		
+		logger.log(.default, "something at .default")
+	}
+
+
+	func testInterpolatedMessage() {
+		let destination = OSLogDestination(system: system, category: category, levels: .all)
+		let logger = Logger(destinations: [destination])
+
+		let string = "string"
+		let number = 42
+
+		logger.default("Logging a string (\(string)) and a number (\(number))")
+
+	}
+
+	func testFormatArgs() {
+
+		let destination = OSLogDestination(system: system, category: category, levels: .all)
+		let logger = Logger(destinations: [destination])
+
+		let string = "string"
+		let number = 42
+
+//		logger.default("Logging a string (\(string)) and a number (\(number))")
+
+		logger.default("Logging a string (%@) and a number (%@)", args: string, number as NSNumber)
+
+	}
+
+	func testLevelFunctions() {
+
+		let destination = OSLogDestination(system: system, category: category, levels: .all)
+		let logger = Logger(destinations: [destination])
+
+		logger.default("something at .default")
+		logger.info("something at .default")
+		logger.debug("something at .default")
+		logger.error("something at .default")
+		logger.fault("something at .default")
+
 	}
 
 }
