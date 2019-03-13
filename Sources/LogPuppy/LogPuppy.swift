@@ -53,7 +53,9 @@ extension Logger {
 }
 
 public struct Level: OptionSet, Sequence {
+	public typealias RawValue = UInt
 	public let rawValue: UInt
+
 	public init(rawValue: RawValue) {
 		self.rawValue = rawValue
 	}
