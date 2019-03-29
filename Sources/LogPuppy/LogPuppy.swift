@@ -28,7 +28,7 @@ public class Logger {
 	}
 
 	private func log(entry: Entry) {
-		for destination in destinations {
+		for destination in destinations where destination.shouldLog(entry: entry) {
 			destination.log(entry: entry)
 		}
 	}
@@ -113,6 +113,7 @@ public struct DefaultFormatter: Formatter {
 }
 
 public struct SimpleFormatter: Formatter {
+	public init() {}
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
 		let format = entry.format
 		let args: [CVarArg] = entry.arguments
@@ -157,7 +158,6 @@ public class OSLogDestination: Destination {
 	}
 
 	public func log(entry: Entry) {
-		guard shouldLog(entry: entry) else { return  }
 		let message = formatter.format(entry, forDestination: self)
 		if #available(iOS 12.0, *) {
 			os_log(osLogType(forLevel: entry.level), log: log, "%{public}s", message)
@@ -199,7 +199,6 @@ public class OutputStreamDestination<Target: TextOutputStream>: Destination {
 	}
 
 	public func log(entry: Entry) {
-		guard shouldLog(entry: entry) else { return  }
 		let message = formatter.format(entry, forDestination: self)
 		message.write(to: &outputStream)
 	}
