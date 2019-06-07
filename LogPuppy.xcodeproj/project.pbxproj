@@ -26,6 +26,7 @@
 
 /* Begin PBXFileReference section */
 		A425DEC02231C74200C288F1 /* Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Functions.swift; sourceTree = "<group>"; };
+		A49B54972253B4B8005BFC92 /* TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TODO.md; sourceTree = "<group>"; };
 		A4A6436B222C5BD100930844 /* LogPuppy.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = LogPuppy.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4A64374222C5BD100930844 /* LogPuppyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LogPuppyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4A64385222C5C1E00930844 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
@@ -62,6 +63,7 @@
 			children = (
 				A4A64385222C5C1E00930844 /* Package.swift */,
 				A4A64386222C5C1E00930844 /* README.md */,
+				A49B54972253B4B8005BFC92 /* TODO.md */,
 				A4A6436D222C5BD100930844 /* Sources */,
 				A4A64378222C5BD100930844 /* Tests */,
 				A4A6436C222C5BD100930844 /* Products */,
