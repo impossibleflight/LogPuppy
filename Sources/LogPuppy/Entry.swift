@@ -16,12 +16,12 @@ public struct Callsite {
 }
 
 public struct Entry {
-	var level: Level.RawValue
-	var format: String
-	var arguments: [CVarArg]
-	var dso: UnsafeRawPointer
-	var callsite: Callsite
-	var timestamp: Date
+	public var level: Level.RawValue
+	public var format: String
+	public var arguments: [CVarArg]
+	public var dso: UnsafeRawPointer
+	public var callsite: Callsite
+	public var timestamp: Date
 
 	init(level: Level.RawValue, format: String, args: [CVarArg] = [], dso: UnsafeRawPointer, callsite: Callsite, timestamp: Date = Date()) {
 		self.level = level
