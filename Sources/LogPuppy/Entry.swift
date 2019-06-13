@@ -9,10 +9,10 @@
 import Foundation
 
 public struct Callsite {
-	let file: String
-	let function: String
-	let line: Int
-	let column: Int
+	public let file: String
+	public let function: String
+	public let line: Int
+	public let column: Int
 }
 
 public struct Entry {
