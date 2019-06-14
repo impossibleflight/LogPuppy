@@ -13,6 +13,7 @@ public protocol Formatter {
 }
 
 public struct DefaultFormatter: Formatter {
+	public init() {}
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
 		let message = String(format: entry.format, arguments: entry.arguments)
 		if let system = destination.system, let category = destination.category {
