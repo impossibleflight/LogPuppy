@@ -10,8 +10,8 @@ import Foundation
 import os.log
 
 public class OSLogDestination: Destination {
-	public var system: String?
-	public var category: String?
+	public let system: String?
+	public let category: String?
 	public var levels: Level
 	public let formatter: Formatter = SimpleFormatter()
 

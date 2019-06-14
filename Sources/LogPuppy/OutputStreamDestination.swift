@@ -9,10 +9,10 @@
 import Foundation
 
 public class OutputStreamDestination<Target: TextOutputStream>: Destination {
-	public var system: String?
-	public var category: String?
+	public let system: String?
+	public let category: String?
 	public var levels: Level
-	public var formatter: Formatter = DefaultFormatter()
+	public let formatter: Formatter = DefaultFormatter()
 
 	public init(system: String?, category: String?, levels: Level, outputStream: inout Target) {
 		self.system = system ?? String(format: "%@[%@]", ProcessInfo.processInfo.processName, ProcessInfo.processInfo.processIdentifier)

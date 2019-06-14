@@ -11,7 +11,7 @@ import Foundation
 public protocol Destination {
 	var system: String? { get }
 	var category: String? { get }
-	var levels: Level { get }
+	var levels: Level { get set }
 	var formatter: Formatter { get }
 
 	func log(entry: Entry)
