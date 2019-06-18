@@ -13,16 +13,21 @@ public protocol Formatter {
 }
 
 public struct DefaultFormatter: Formatter {
-	public init() {}
+	let dateFormatter: DateFormatter
+	public init() {
+		dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSSZ"
+	}
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
-		let message = String(format: entry.format, arguments: entry.arguments)
+		let timestamp = dateFormatter.string(from: entry.timestamp)
 		let level = Level(entry.level).name
+		let message = String(format: entry.format, arguments: entry.arguments)
 		if let system = destination.system, let category = destination.category {
-			return String(format: "%@ %@ [%@] %@", system, level, category, message)
+			return String(format: "%@ %@ %@ [%@] %@", timestamp, system, level, category, message)
 		} else if let category = destination.category {
-			return String(format: "%@ [%@] %@", level, category, message)
+			return String(format: "%@ %@ [%@] %@", timestamp, level, category, message)
 		} else {
-			return String(format: "%@ %@", level, message)
+			return String(format: "%@ %@ %@", timestamp, level, message)
 		}
 	}
 }
