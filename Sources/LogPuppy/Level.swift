@@ -9,8 +9,8 @@
 import Foundation
 
 public struct Level: OptionSet, Sequence {
-	public typealias RawValue = UInt
-	public let rawValue: UInt
+	public typealias RawValue = Int
+	public let rawValue: Int
 
 	public init(rawValue: RawValue) {
 		self.rawValue = rawValue
@@ -27,6 +27,25 @@ public struct Level: OptionSet, Sequence {
 	public static let fault = Level(1 << 4)
 
 	public static let all: Level = [.default, .info, .debug, .error, .fault]
+
+	public var name: String {
+		switch self {
+		case .none:
+			return "None"
+		case .default:
+			return "Default"
+		case .info:
+			return "Info"
+		case .debug:
+			return "Debug"
+		case .error:
+			return "Error"
+		case .fault:
+			return "Fault"
+		default:
+			return String(describing: self)
+		}
+	}
 }
 
 

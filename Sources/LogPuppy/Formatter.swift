@@ -16,12 +16,13 @@ public struct DefaultFormatter: Formatter {
 	public init() {}
 	public func format(_ entry: Entry, forDestination destination: Destination) -> String {
 		let message = String(format: entry.format, arguments: entry.arguments)
+		let level = Level(entry.level).name
 		if let system = destination.system, let category = destination.category {
-			return String(format: "%@ [%@] %@", system, category, message)
+			return String(format: "%@ %@ [%@] %@", system, level, category, message)
 		} else if let category = destination.category {
-			return String(format: "[%@] %@", category, message)
+			return String(format: "%@ [%@] %@", level, category, message)
 		} else {
-			return String(format: "%@", message)
+			return String(format: "%@ %@", level, message)
 		}
 	}
 }
