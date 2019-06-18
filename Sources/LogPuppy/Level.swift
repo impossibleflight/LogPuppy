@@ -9,8 +9,8 @@
 import Foundation
 
 public struct Level: OptionSet, Sequence {
-	public typealias RawValue = Int
-	public let rawValue: Int
+	public typealias RawValue = UInt
+	public let rawValue: RawValue
 
 	public init(rawValue: RawValue) {
 		self.rawValue = rawValue
