@@ -226,7 +226,7 @@ extension Logger {
 public extension Logger {
 	func `for`(_ type: Any.Type, dso: UnsafeRawPointer = #dsohandle) -> Logger {
 		let category = String(describing: type)
-		return self.setting(category: category, levels: levels, dso: dso)
+		return self.setting(category: category, dso: dso)
 	}
 	func setting(category newValue: String, dso: UnsafeRawPointer = #dsohandle) -> Logger {
 		var destinationsForCategory = [Destination]()
