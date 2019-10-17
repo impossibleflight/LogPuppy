@@ -213,14 +213,26 @@ extension Logger {
 
 extension Logger {
 	public static func `for`(_ type: Any.Type, levels: Level, dso: UnsafeRawPointer = #dsohandle) -> Logger {
-		let calleeBundle = bundle(forDso: dso)
 		let category = String(describing: type)
-		let destination = OSLogDestination(system: calleeBundle?.bundleIdentifier, category: category, levels: levels)
-		return Logger(destinations: [destination])
+		return Logger.for(category, levels: levels, dso: dso)
 	}
 	public static func `for`(_ category: String, levels: Level, dso: UnsafeRawPointer = #dsohandle) -> Logger {
 		let calleeBundle = bundle(forDso: dso)
 		let destination = OSLogDestination(system: calleeBundle?.bundleIdentifier, category: category, levels: levels)
 		return Logger(destinations: [destination])
+	}
+}
+
+public extension Logger {
+	func `for`(_ type: Any.Type, levels: Level, dso: UnsafeRawPointer = #dsohandle) -> Logger {
+		let category = String(describing: type)
+		return self.setting(category: category, levels: levels, dso: dso)
+	}
+	func setting(category newValue: String, levels: Level, dso: UnsafeRawPointer = #dsohandle) -> Logger {
+		var destinationsForCategory = [Destination]()
+		for destination in destinations {
+			destinationsForCategory.append(destination.setting(category: newValue))
+		}
+		return Logger(destinations: destinationsForCategory)
 	}
 }

@@ -30,5 +30,9 @@ public class OutputStreamDestination<Target: TextOutputStream>: Destination {
 		// TODO: depends on what the stream represents
 	}
 
+	public func setting(category newValue: String?) -> Self {
+		return OutputStreamDestination(system: system, category: newValue, levels: levels, outputStream: &outputStream) as! Self
+	}
+
 	private var outputStream: Target
 }

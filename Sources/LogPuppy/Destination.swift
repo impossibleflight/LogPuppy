@@ -16,6 +16,8 @@ public protocol Destination {
 
 	func log(entry: Entry)
 	func rotate()
+
+	func setting(category: String?) -> Self
 }
 
 extension Destination {

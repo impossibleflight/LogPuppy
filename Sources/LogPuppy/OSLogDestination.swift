@@ -56,5 +56,9 @@ public class OSLogDestination: Destination {
 		// os.log takes care of all this
 	}
 
+	public func setting(category newValue: String?) -> Self {
+		return OSLogDestination(system: system, category: newValue, levels: levels) as! Self
+	}
+
 	private var log: OSLog
 }
