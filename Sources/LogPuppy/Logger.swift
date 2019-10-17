@@ -143,12 +143,13 @@ extension Logger: Benchmarking {
 	}
 
 	public func timeBeacon(_ levels: Level = .default, _ label: String = #function, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) -> MeasurementBeacon {
-		let message = "Started { \(label) }"
+		let identifier = UUID()
+		let message = "Started (\(identifier)) { \(label) }"
 		log(levels, message, file: file, function: function, line: line, column: column, arguments: [])
 		let start = CFAbsoluteTimeGetCurrent()
 		let callback = { [weak self] in
 			let elapsed = CFAbsoluteTimeGetCurrent()-start;
-			let message = "Completed { \(label) } - \(elapsed)s"
+			let message = "Completed (\(identifier)) { \(label) } - \(elapsed)s"
 			self?.log(levels, message, dso: dso, file: file, function: function, line: line, column: column, arguments: [])
 		}
 		return callback
