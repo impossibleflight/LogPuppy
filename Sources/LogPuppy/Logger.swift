@@ -31,7 +31,7 @@ public protocol ConvenienceLogging {
 }
 
 public protocol ErrorLogging {
-	func error(_ error: Error, dso: UnsafeRawPointer, file: String, function: String, line: Int, column: Int)
+	func error(_ error: Error, callStack: [String], dso: UnsafeRawPointer, file: String, function: String, line: Int, column: Int)
 }
 
 public protocol Benchmarking {
@@ -110,8 +110,12 @@ extension Logger: ConvenienceLogging {
 
 //MARK: ErrorLogging
 extension Logger: ErrorLogging {
-	public func error(_ error: Error, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) {
-		log(.error, "%@", dso: dso, file: file, function: function, line: line, column: column, arguments: [String(describing: error)])
+	public func error(_ error: Error, callStack: [String] = Thread.callStackSymbols, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) {
+		let message = 	"""
+						\(String(describing: error))
+						\(callStack)
+						"""
+		log(.error, message, dso: dso, file: file, function: function, line: line, column: column)
 	}
 }
 
