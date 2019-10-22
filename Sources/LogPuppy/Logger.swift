@@ -31,7 +31,8 @@ public protocol ConvenienceLogging {
 }
 
 public protocol ErrorLogging {
-	func error(_ error: Error, callStack: [String], dso: UnsafeRawPointer, file: String, function: String, line: Int, column: Int)
+	func error(_ error: Error, callStack: [String]?, dso: UnsafeRawPointer, file: String, function: String, line: Int, column: Int)
+	func fault(_ error: Error, callStack: [String], dso: UnsafeRawPointer, file: String, function: String, line: Int, column: Int)
 }
 
 public protocol Benchmarking {
@@ -110,10 +111,19 @@ extension Logger: ConvenienceLogging {
 
 //MARK: ErrorLogging
 extension Logger: ErrorLogging {
-	public func error(_ error: Error, callStack: [String] = Thread.callStackSymbols, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) {
+	public func error(_ error: Error, callStack: [String]? = nil, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) {
+		var message = String(describing: error)
+		if let stack = callStack {
+			message += "\n"
+			message += stack.joined(separator: "\n")
+		}
+		log(.error, message, dso: dso, file: file, function: function, line: line, column: column)
+	}
+
+	public func fault(_ error: Error, callStack: [String] = Thread.callStackSymbols, dso: UnsafeRawPointer = #dsohandle, file: String = #file, function: String = #function, line: Int = #line, column: Int = #column) {
 		let message = 	"""
 						\(String(describing: error))
-						\(callStack)
+						\(callStack.joined(separator: "\n"))
 						"""
 		log(.error, message, dso: dso, file: file, function: function, line: line, column: column)
 	}
